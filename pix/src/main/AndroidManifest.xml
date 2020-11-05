@@ -16,5 +16,8 @@
             android:name="com.fxn.pix.Pix"
             android:noHistory="true"
             android:screenOrientation="portrait"></activity>
+        <provider
+            android:name="com.fxn.utility.OpenCVInitializer"
+            android:authorities="com.fxn.utility.OpenCVInitializer" />
     </application>
 </manifest>
