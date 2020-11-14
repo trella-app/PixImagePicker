@@ -13,6 +13,7 @@
         android:keepScreenOn = "true"
         android:layout_gravity="center"
         app:cameraFacing = "back"
+        app:cameraEngine="camera2"
         app:cameraFlash = "off"
         app:cameraGestureLongTap = "autoFocus"
         app:cameraGesturePinch = "zoom"

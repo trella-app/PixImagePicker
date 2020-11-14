@@ -43,6 +43,15 @@ public class JavaCamera2Frame implements CameraBridgeViewBase.CvCameraViewFrame 
         mUVFrameData = UV;
         mRgba = new Mat();
     }
+    public JavaCamera2Frame(Mat Y, Mat UV, int width, int height, int preview) {
+        super();
+        mWidth = width;
+        mHeight = height;
+        mYuvFrameData = Y;
+        mUVFrameData = UV;
+        mPreviewFormat = preview;
+        mRgba = new Mat();
+    }
 
     public void release() {
         mRgba.release();
@@ -53,4 +62,5 @@ public class JavaCamera2Frame implements CameraBridgeViewBase.CvCameraViewFrame 
     private Mat mRgba;
     private int mWidth;
     private int mHeight;
+    private int mPreviewFormat = ImageFormat.YUV_420_888;
 }

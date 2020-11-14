@@ -13,10 +13,7 @@ import com.otaliastudios.cameraview.CameraView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.opencv.android.BaseLoaderCallback
-import org.opencv.android.JavaCamera2Frame
-import org.opencv.android.LoaderCallbackInterface
-import org.opencv.android.OpenCVLoader
+import org.opencv.android.*
 import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.Mat
@@ -28,7 +25,7 @@ import kotlin.math.pow
 class BlueImageDetection(activity: AppCompatActivity) {
     private val TAG = "openCVLoader"
     private var isLoaded = false
-    private val mPreviewFormat = ImageFormat.YUV_420_888
+    private var mPreviewFormat = ImageFormat.YUV_420_888
 
     private val mLoaderCallback: BaseLoaderCallback = object : BaseLoaderCallback(activity) {
         override fun onManagerConnected(status: Int) {
@@ -66,11 +63,11 @@ class BlueImageDetection(activity: AppCompatActivity) {
 
         camera.addFrameProcessor { frame ->
             if (isLoaded) {
+                val previewSize = camera.pictureSize
                 if (frame.getData<Any>() is Image) {
                     runBlocking {
                         withContext(Dispatchers.IO) {
                             val image = frame.getData<Image>()
-                            val previewSize = camera.pictureSize
                             previewSize?.let {
                                 val w = it.width
                                 val h = it.height
@@ -79,7 +76,7 @@ class BlueImageDetection(activity: AppCompatActivity) {
                                 val uv_plane = planes[1].buffer
                                 val y_mat = Mat(h, w, CvType.CV_8UC1, y_plane)
                                 val uv_mat = Mat(h / 2, w / 2, CvType.CV_8UC2, uv_plane)
-                                val frame = JavaCamera2Frame(y_mat, uv_mat, w, h)
+                                val frame = JavaCamera2Frame(y_mat, uv_mat, w, h, mPreviewFormat)
                                 val std = blurLevel1(frame.gray())
                                 withContext(Dispatchers.Main) {
                                     onBlurValueCallback.onValue(std)
@@ -91,6 +88,31 @@ class BlueImageDetection(activity: AppCompatActivity) {
                     }
 
 
+                } else if (frame.getData<Any>() is ByteArray) {
+                    runBlocking {
+                        /* Image format NV21 causes issues in the Android emulators */if (Build.FINGERPRINT.startsWith("generic")
+                            || Build.FINGERPRINT.startsWith("unknown")
+                            || Build.MODEL.contains("google_sdk")
+                            || Build.MODEL.contains("Emulator")
+                            || Build.MODEL.contains("Android SDK built for x86")
+                            || Build.MANUFACTURER.contains("Genymotion")
+                            || Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic")
+                            || "google_sdk" == Build.PRODUCT) mPreviewFormat = ImageFormat.YV12 // "generic" or "android" = android emulator
+                    else
+                        mPreviewFormat = ImageFormat.NV21
+
+                        previewSize?.let {
+                            val w = it.width
+                            val h = it.height
+                            val mFrame = Mat(w + h / 2, w, CvType.CV_8UC1)
+                            mFrame.put(0, 0, frame.getData<ByteArray>())
+                            val mCameraFrame = JavaCameraFrame(mFrame, w, h, mPreviewFormat)
+                            val std = (blurLevel1(mCameraFrame.gray())/100)+20
+                            withContext(Dispatchers.Main) {
+                                onBlurValueCallback.onValue(std)
+                            }
+                        }
+                    }
                 }
             }
 

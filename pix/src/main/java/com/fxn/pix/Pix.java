@@ -62,6 +62,7 @@ import com.otaliastudios.cameraview.FileCallback;
 import com.otaliastudios.cameraview.PictureResult;
 import com.otaliastudios.cameraview.VideoResult;
 import com.otaliastudios.cameraview.controls.Audio;
+import com.otaliastudios.cameraview.controls.Engine;
 import com.otaliastudios.cameraview.controls.Facing;
 import com.otaliastudios.cameraview.controls.Flash;
 import com.otaliastudios.cameraview.controls.Mode;
@@ -426,6 +427,7 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
         camera = findViewById(R.id.camera_view);
         textBlurResult = findViewById(R.id.text_result);
         camera.setMode(Mode.PICTURE);
+        camera.setEngine(Engine.CAMERA2);
         if (options.isExcludeVideos()) {
             camera.setAudio(Audio.OFF);
         }
@@ -767,14 +769,17 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
         });
     }
      private void startBlurDetection(Double blurValue ) {
-        if (blurValue > 100.00) {
+        if (blurValue > 90.00) {
             textBlurResult.setText("👍 👌 📸");
             clickme.setEnabled(true);
             clickme.setClickable(true);
+            clickme.setImageResource(R.drawable.ring);
         } else{
             textBlurResult.setText( "Bluryy! \uD83D\uDC4E \uD83D\uDE1E ");
             clickme.setEnabled(false);
             clickme.setClickable(false);
+            clickme.setImageResource(R.drawable.ring_red);
+
         }
 
         Log.d("openCVBlur", System.currentTimeMillis()+"");
