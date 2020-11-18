@@ -7,12 +7,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -28,6 +30,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.res.ResourcesCompat;
@@ -44,9 +47,11 @@ import com.fxn.adapters.MainImageAdapter;
 import com.fxn.interfaces.OnSelectionListener;
 import com.fxn.interfaces.WorkFinish;
 import com.fxn.modals.Img;
+import com.fxn.utility.BlueImageDetection;
 import com.fxn.utility.Constants;
 import com.fxn.utility.HeaderItemDecoration;
 import com.fxn.utility.ImageVideoFetcher;
+import com.fxn.utility.OnBlurDetectionCallback;
 import com.fxn.utility.PermUtil;
 import com.fxn.utility.Utility;
 import com.fxn.utility.ui.FastScrollStateChangeListener;
@@ -57,9 +62,12 @@ import com.otaliastudios.cameraview.FileCallback;
 import com.otaliastudios.cameraview.PictureResult;
 import com.otaliastudios.cameraview.VideoResult;
 import com.otaliastudios.cameraview.controls.Audio;
+import com.otaliastudios.cameraview.controls.Engine;
 import com.otaliastudios.cameraview.controls.Facing;
 import com.otaliastudios.cameraview.controls.Flash;
 import com.otaliastudios.cameraview.controls.Mode;
+import com.otaliastudios.cameraview.frame.Frame;
+import com.otaliastudios.cameraview.frame.FrameProcessor;
 import com.otaliastudios.cameraview.size.AspectRatio;
 import com.otaliastudios.cameraview.size.SizeSelector;
 import com.otaliastudios.cameraview.size.SizeSelectors;
@@ -72,6 +80,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+
+import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
 
 public class Pix extends AppCompatActivity implements View.OnTouchListener {
 
@@ -97,7 +108,7 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
     private BottomSheetBehavior mBottomSheetBehavior;
     private InstantImageAdapter initaliseadapter;
     private View status_bar_bg, mScrollbar, topbar, bottomButtons, sendButton;
-    private TextView mBubbleView, img_count;
+    private TextView mBubbleView, img_count,textBlurResult;
     private ImageView mHandleView, selection_back, selection_check;
     private ProgressBar video_counter_progressbar = null;
     private ViewPropertyAnimator mScrollbarAnimator;
@@ -115,6 +126,7 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
     private boolean LongSelection = false;
     private Options options = null;
     private TextView selection_count;
+    private BlueImageDetection blurFilter = new BlueImageDetection(this);
     private RecyclerView.OnScrollListener mScrollListener = new RecyclerView.OnScrollListener() {
 
         @Override
@@ -389,6 +401,7 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
         super.onPause();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void initialize() {
         WindowManager.LayoutParams params = getWindow().getAttributes();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -412,7 +425,9 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
         colorPrimaryDark =
                 ResourcesCompat.getColor(getResources(), R.color.colorPrimaryPix, getTheme());
         camera = findViewById(R.id.camera_view);
+        textBlurResult = findViewById(R.id.text_result);
         camera.setMode(Mode.PICTURE);
+        camera.setEngine(Engine.CAMERA2);
         if (options.isExcludeVideos()) {
             camera.setAudio(Audio.OFF);
         }
@@ -430,6 +445,13 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
         camera.setPictureSize(result);
         camera.setVideoSize(result);
         camera.setLifecycleOwner(Pix.this);
+        blurFilter.startDetection(camera, new OnBlurDetectionCallback() {
+            @Override
+            public void onValue(double v) {
+                startBlurDetection(v);
+            }
+        });
+
 
         if (options.isFrontfacing()) {
             camera.setFacing(Facing.FRONT);
@@ -597,6 +619,8 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
         updateImages();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+
     private void onClickMethods() {
         clickme.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -743,6 +767,24 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
                 }
             }
         });
+    }
+     private void startBlurDetection(Double blurValue ) {
+        if (blurValue > 90.00) {
+            textBlurResult.setText("👍 👌 📸");
+            clickme.setEnabled(true);
+            clickme.setClickable(true);
+            clickme.setImageResource(R.drawable.ring);
+        } else{
+            textBlurResult.setText( "Bluryy! \uD83D\uDC4E \uD83D\uDE1E ");
+            clickme.setEnabled(false);
+            clickme.setClickable(false);
+            clickme.setImageResource(R.drawable.ring_red);
+
+        }
+
+        Log.d("openCVBlur", System.currentTimeMillis()+"");
+        Log.d("openCVBlurValue", blurValue + "");
+        Log.d("openCVBlur", System.currentTimeMillis()+"");
     }
 
     private void updateImages() {
