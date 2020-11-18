@@ -9,7 +9,7 @@
     <string name="pix_recent">Recent</string>
     <string name="pix_last_month">Last Month</string>
     <string name="pix_last_week">Last Week</string>
-    <string name="blur_detected">Photo is blurred 👎</string>
-    <string name="image_clear">Photo is clear 👍, capture now</string>
+    <string name="blur_detected">الصورة غير واضحه 👎</string>
+    <string name="image_clear">الصورة واضحه 👍 ، التقط الآن</string>
     <string name="cannot_click_image_pix">Can not add more than %s images</string>
 </resources>

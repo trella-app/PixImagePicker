@@ -24,7 +24,7 @@ allprojects {
         jcenter()
         maven { url "http://dl.bintray.com/piasy/maven" }
         maven {
-            name = "GitHubPackages"
+            name = "Pix"
             /** Configure path of your package repository on Github
              ** Replace GITHUB_USERID with your/organisation Github userID
              ** and REPOSITORY with the repository name on GitHub
@@ -43,16 +43,16 @@ allprojects {
 }
 publishing {
     publications {
-        base(MavenPublication) {
+        pix(MavenPublication) {
             groupId 'com.trella.pix'
             version "1.0.0"
-            artifactId 'blur'
+            artifactId 'image'
             artifact("${rootProject.rootDir}//pix/build/outputs/aar/pix-release.aar")
         }
     }
     repositories {
         maven {
-            name = "GitHubPackages"
+            name = "Pix"
             /** Configure path of your package repository on Github
              ** Replace GITHUB_USERID with your/organisation Github userID
              ** and REPOSITORY with the repository name on GitHub

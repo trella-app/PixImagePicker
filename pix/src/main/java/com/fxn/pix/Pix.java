@@ -770,12 +770,12 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
     }
      private void startBlurDetection(Double blurValue ) {
         if (blurValue > 90.00) {
-            textBlurResult.setText("👍 👌 📸");
+            textBlurResult.setText(getString(R.string.image_clear));
             clickme.setEnabled(true);
             clickme.setClickable(true);
             clickme.setImageResource(R.drawable.ring);
         } else{
-            textBlurResult.setText( "Bluryy! \uD83D\uDC4E \uD83D\uDE1E ");
+            textBlurResult.setText(getString(R.string.blur_detected));;
             clickme.setEnabled(false);
             clickme.setClickable(false);
             clickme.setImageResource(R.drawable.ring_red);

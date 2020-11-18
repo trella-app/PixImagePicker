@@ -9,5 +9,7 @@
     <string name="pix_recent">Letzte</string>
     <string name="pix_last_month">Letzter Monat</string>
     <string name="pix_last_week">Letzte Woche</string>
-  <string name="cannot_click_image_pix">Nicht mehr als %s Bilder hinzufügbar.</string>
+    <string name="blur_detected">Photo is blurred 👎</string>
+    <string name="image_clear">Photo is clear 👍, capture now</string>
+    <string name="cannot_click_image_pix">Nicht mehr als %s Bilder hinzufügbar.</string>
 </resources>
